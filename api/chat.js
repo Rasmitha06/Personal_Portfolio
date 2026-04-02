@@ -40,7 +40,11 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json({ reply: "Hello, backend is working!" });
+    const reply =
+  data.candidates?.[0]?.content?.parts?.[0]?.text ||
+  "Sorry, I couldn't generate a response.";
+
+return res.status(200).json({ reply });
   } catch (error) {
     console.error('Server error:', error);
     return res.status(500).json({ error: 'Internal server error' });
