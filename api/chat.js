@@ -104,11 +104,20 @@ Examples of good project-answer style:
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Gemini API error:', data);
-      return res.status(response.status).json({
-        error: data.error?.message || 'Gemini API request failed'
-      });
-    }
+  console.error('Gemini API error:', data);
+
+  const errorMessage = data.error?.message || 'Gemini API request failed';
+
+  if (errorMessage.toLowerCase().includes('quota')) {
+    return res.status(200).json({
+      reply: "I'm currently receiving too many requests right now. Please wait a few seconds and try again."
+    });
+  }
+
+  return res.status(response.status).json({
+    error: errorMessage
+  });
+}
 
     const reply =
   data.candidates?.[0]?.content?.parts?.[0]?.text ||
