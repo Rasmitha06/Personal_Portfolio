@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rasmitha's Portfolio Chatbot</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,wght@0,300;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --bubble-user: #2d4a3e;
+    --bubble-bot: #f0ece6;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-user: #ffffff;
+    --accent: #c17f4a;
+    --accent-light: #f5ede2;
+    --border: #e8e2da;
+    --shadow: 0 8px 32px rgba(0,0,0,0.08);
+    --radius: 20px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .chat-wrapper {
+    width: 100%;
+    max-width: 420px;
+    height: 620px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow), 0 2px 8px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  /* Header */
+  .chat-header {
+    background: var(--bubble-user);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #e8a86a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    color: white;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .header-info h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+  }
+
+  .header-info p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    background: #6ee7a0;
+    border-radius: 50%;
+    margin-left: auto;
+    box-shadow: 0 0 0 2px rgba(110,231,160,0.3);
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(110,231,160,0.3); }
+    50% { box-shadow: 0 0 0 5px rgba(110,231,160,0.1); }
+  }
+
+  /* Messages */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .message {
+    display: flex;
+    flex-direction: column;
+    max-width: 82%;
+    animation: fadeUp 0.3s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.bot { align-self: flex-start; }
+  .message.user { align-self: flex-end; }
+
+  .bubble {
+    padding: 11px 15px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.55;
+    font-weight: 400;
+  }
+
+  .message.bot .bubble {
+    background: var(--bubble-bot);
+    color: var(--text-primary);
+    border-bottom-left-radius: 4px;
+  }
+
+  .message.user .bubble {
+    background: var(--bubble-user);
+    color: var(--text-user);
+    border-bottom-right-radius: 4px;
+  }
+
+  .bubble a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .message.user .bubble a { color: #a8d5c0; }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 16px;
+    background: var(--bubble-bot);
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+  }
+
+  .typing-dot {
+    width: 7px;
+    height: 7px;
+    background: #aaa;
+    border-radius: 50%;
+    animation: typingBounce 1.2s ease infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
+  }
+
+  /* Suggestions */
+  .suggestions {
+    padding: 0 18px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    flex-shrink: 0;
+  }
+
+  .suggestion-btn {
+    background: var(--accent-light);
+    border: 1px solid #e2cebc;
+    color: #7a4f28;
+    border-radius: 20px;
+    padding: 6px 13px;
+    font-size: 12.5px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .suggestion-btn:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  /* Input */
+  .chat-input-area {
+    padding: 14px 18px 18px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-shrink: 0;
+    background: var(--surface);
+  }
+
+  .chat-input {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-primary);
+    background: var(--bg);
+    resize: none;
+    outline: none;
+    max-height: 100px;
+    line-height: 1.5;
+    transition: border-color 0.2s ease;
+  }
+
+  .chat-input:focus { border-color: var(--accent); }
+  .chat-input::placeholder { color: #bbb; }
+
+  .send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--bubble-user);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+  }
+
+  .send-btn:hover { background: #3d6456; transform: scale(1.05); }
+  .send-btn:active { transform: scale(0.97); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .send-btn svg { width: 18px; height: 18px; fill: white; }
+</style>
+</head>
+<body>
+<div class="chat-wrapper">
+  <div class="chat-header">
+    <div class="avatar">R</div>
+    <div class="header-info">
+      <h2>Rasmitha's Assistant</h2>
+      <p>Ask me anything about Rasmitha ✨</p>
+    </div>
+    <div class="status-dot"></div>
+  </div>
+
+  <div class="chat-messages" id="messages"></div>
+
+  <div class="suggestions" id="suggestions">
+    <button class="suggestion-btn" onclick="sendSuggestion(this)">👩‍💻 About Rasmitha</button>
+    <button class="suggestion-btn" onclick="sendSuggestion(this)">🛠️ Skills & Tech</button>
+    <button class="suggestion-btn" onclick="sendSuggestion(this)">📁 Projects</button>
+    <button class="suggestion-btn" onclick="sendSuggestion(this)">🎓 Education</button>
+    <button class="suggestion-btn" onclick="sendSuggestion(this)">📬 Contact</button>
+  </div>
+
+  <div class="chat-input-area">
+    <textarea class="chat-input" id="chatInput" placeholder="Ask me anything about Rasmitha..." rows="1"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `You are a warm, friendly, and knowledgeable assistant for Rasmitha Chinthalapally's portfolio website. Your job is to answer visitor questions about Rasmitha in a conversational, helpful, and enthusiastic way. Keep responses concise (2-4 sentences unless more detail is needed). Use emojis occasionally to keep things friendly. Never make up information — only use what's provided below.
+
+ABOUT RASMITHA:
+Full Name: Chinthalapally Rasmitha
+Phone: (656) 216-9670
+Email: rasmitha@usf.edu
+GitHub: https://github.com/Rasmitha06
+LinkedIn: https://www.linkedin.com/in/rasmithach03/
+
+SUMMARY:
+Graduate Computer Science student at the University of South Florida (USF), Tampa, FL. Specializes in scalable ML pipelines, feature engineering, and low-latency inference systems. Experienced in model evaluation, deployment efficiency, and performance optimization using Python, Azure, and SQL.
+
+EDUCATION:
+1. University of South Florida, Tampa, FL — M.S. in Computer Science (Expected May 2026), GPA: 3.89
+   Coursework: Data Mining, AI, Machine Learning, Network Security, HCI
+2. Malla Reddy Engineering College for Women, Hyderabad — B.Tech in Computer Science (Dec 2020 – May 2024), GPA: 9.22
+
+EXPERIENCE:
+- Student Assistant at USF (Jan 2025 – Present):
+  • Conducted structured model performance reviews for 20+ ML and analytics projects
+  • Built a Python automation framework for cleaning and preprocessing 500+ datasets, saving 20+ hours/week
+  • Streamlined lab workflows for 30+ students using Copilot-assisted debugging, reducing support queries by 25%
+
+PROJECTS:
+1. Real-Time Sign Language Interpretation (May 2025): Computer-vision pipeline extracting 63 hand landmarks/frame, accuracy 89%→93% across 26 gesture classes, <20ms latency at 30+ FPS, 2,500-sample custom dataset.
+2. Suspicious Activity Detection from CCTV (Oct 2024): ResNet-based image classifier with 90% accuracy, 40% reduction in processed frames, GUI-based alert tool reducing response time by 30%.
+3. Detecting Malicious URLs (Jul 2023): Real-time web app for URL detection, Logistic Regression & SVM models, 9% accuracy boost via hyperparameter tuning, <50ms inference latency, published in JST journal (DOI: 10.46243).
+4. Recognition of Emotional Cues in Speech (Nov 2022): CNN classifier using MFCCs, 91% F1-score across 5 emotional categories, pipeline over 1,400+ RAVDESS audio samples.
+
+PUBLICATION:
+"Enhanced Malicious URL Detection System with Machine Learning Algorithms", Journal of Science and Technology (JST), DOI: 10.46243, Volume 8, Issue 07, July 2023.
+
+SKILLS:
+- Programming & Databases: Python, C, Java, SQL, JavaScript, HTML, CSS, MySQL, Oracle, MongoDB
+- Cloud & Big Data: Microsoft Azure, AWS (S3, EC2), Snowflake, Databricks, PySpark, Hadoop
+- Data Engineering: Data Pipelines, ETL, Data Transformation, Pandas, NumPy, Pickle, MFCC
+- Tools & Visualization: Git, GitHub Copilot, Linux, Power BI, Tableau, SharePoint
+- Machine Learning: TensorFlow, CNNs, NLP, OpenCV, Feature Engineering, Model Evaluation, MediaPipe, Scikit-learn, Keras
+
+If asked about contact or hiring, encourage visitors to reach out via email (rasmitha@usf.edu) or LinkedIn. Always be positive and represent Rasmitha well!`;
+
+const conversationHistory = [{ role: 'user', content: 'Tell me about Rasmitha' },
+  { role: 'assistant', content: '...' }];
+let isLoading = false;
+
+function addMessage(text, role, animate = true) {
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  if (!animate) div.style.animationDelay = '0s';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = text.replace(/\n/g, '<br>').replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+  div.appendChild(bubble);
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'message bot';
+  div.id = 'typing';
+  div.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function hideTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+async function sendMessage(overrideText) {
+  if (isLoading) return;
+  const input = document.getElementById('chatInput');
+  const text = overrideText || input.value.trim();
+  if (!text) return;
+
+  // Hide suggestions after first message
+  document.getElementById('suggestions').style.display = 'none';
+
+  addMessage(text, 'user');
+  conversationHistory.push({ role: 'user', content: text });
+  input.value = '';
+  input.style.height = 'auto';
+
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+  showTyping();
+
+  try {
+    const response = await fetch('/api/chat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    messages: conversationHistory
+  })
+});
+
+const data = await response.json();
+
+if (!response.ok) {
+  console.error(data);
+  throw new Error(data.error || 'Request failed');
+}
+
+const reply = data.reply || "Sorry, I couldn't get a response right now.";
+hideTyping();
+addMessage(reply, 'bot');
+conversationHistory.push({ role: 'assistant', content: reply });
+  } catch (err) {
+    hideTyping();
+    addMessage("Oops! Something went wrong. Please try again in a moment. 😊", 'bot');
+  }
+
+  isLoading = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function sendSuggestion(btn) {
+  const text = btn.textContent.replace(/^[^\w]+/, '').trim();
+  sendMessage(text);
+}
+
+// Auto-resize textarea
+document.getElementById('chatInput').addEventListener('input', function () {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+document.getElementById('chatInput').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// Welcome message
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    addMessage("Hi there! 👋 I'm Rasmitha's assistant. I can tell you all about her background, skills, projects, and more. What would you like to know?", 'bot');
+  }, 400);
+});
+</script>
+</body>
+</html>
