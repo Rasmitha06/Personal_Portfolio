@@ -376,15 +376,16 @@ function hideTyping() {
 
 async function sendMessage(overrideText) {
   if (isLoading) return;
+
   const input = document.getElementById('chatInput');
   const text = overrideText || input.value.trim();
   if (!text) return;
 
-  // Hide suggestions after first message
   document.getElementById('suggestions').style.display = 'none';
 
   addMessage(text, 'user');
   conversationHistory.push({ role: 'user', content: text });
+
   input.value = '';
   input.style.height = 'auto';
 
@@ -394,31 +395,32 @@ async function sendMessage(overrideText) {
 
   try {
     const response = await fetch('/api/chat', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    messages: conversationHistory
-  })
-});
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: conversationHistory })
+    });
 
-const data = await response.json();
+    const data = await response.json();
+    console.log('Frontend received:', data);
 
-if (!response.ok) {
-  console.error(data);
-  throw new Error(data.error || 'Request failed');
-}
+    if (!response.ok) {
+      throw new Error(data.error || 'Request failed');
+    }
 
-const reply = data.reply || "Sorry, I couldn't get a response right now.";
-hideTyping();
-addMessage(reply, 'bot');
-conversationHistory.push({ role: 'assistant', content: reply });
-  } catch (err) {
+    hideTyping();
+
+    const reply = data.reply || "Sorry, I couldn't get a response right now.";
+    addMessage(reply, 'bot');
+    conversationHistory.push({ role: 'assistant', content: reply });
+
+  } catch (error) {
+    console.error('Chatbot frontend error:', error);
     hideTyping();
     addMessage("Oops! Something went wrong. Please try again in a moment. 😊", 'bot');
+  } finally {
+    isLoading = false;
+    document.getElementById('sendBtn').disabled = false;
   }
-
-  isLoading = false;
-  document.getElementById('sendBtn').disabled = false;
 }
 
 function sendSuggestion(btn) {
