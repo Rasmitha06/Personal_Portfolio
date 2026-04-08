@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: [`${__dirname}/.env`, '.env'] });
 
 const express = require('express');
 const cors = require('cors');
@@ -8,9 +8,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post('/chat', async (req, res) => {
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'portfolio-chat-backend',
+    routes: ['POST /chat', 'POST /api/chat']
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+app.post(['/chat', '/api/chat'], async (req, res) => {
   try {
-    const { messages } = req.body;
+    const { messages = [] } = req.body || {};
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'Missing GEMINI_API_KEY in environment' });
+    }
 
     // Convert your existing chat history into Gemini's expected format
     const geminiContents = messages.map((msg) => ({
@@ -58,7 +74,7 @@ app.post('/chat', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

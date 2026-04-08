@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "dev": "serve . -l 3000",
+    "dev:frontend": "serve . -l 3000",
+    "dev:backend": "PORT=3001 node backend/server.js",
+    "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\""
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.0",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "serve": "^14.2.6"
+  }
+}

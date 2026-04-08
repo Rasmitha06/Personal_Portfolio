@@ -4,85 +4,107 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Rasmitha's Portfolio Chatbot</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,wght@0,300;0,500;1,300&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #faf8f5;
-    --surface: #ffffff;
-    --bubble-user: #2d4a3e;
-    --bubble-bot: #f0ece6;
-    --text-primary: #1a1a1a;
-    --text-secondary: #6b6b6b;
+    --bg: #050d1a;
+    --surface: rgba(15, 25, 50, 0.82);
+    --surface-soft: rgba(9, 18, 36, 0.92);
+    --bubble-user: #00d4ff;
+    --bubble-bot: rgba(255, 255, 255, 0.04);
+    --text-primary: #eef2ff;
+    --text-secondary: #8896b3;
+    --text-user: #050d1a;
+    --accent: #00d4ff;
+    --accent-light: rgba(0, 212, 255, 0.08);
+    --border: rgba(0, 212, 255, 0.18);
+    --shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
+  }
+
+  body.light {
+    --bg: #f2f5fc;
+    --surface: rgba(255, 255, 255, 0.9);
+    --surface-soft: rgba(242, 245, 252, 0.96);
+    --bubble-user: #1755c8;
+    --bubble-bot: rgba(23, 85, 200, 0.07);
+    --text-primary: #0d1526;
+    --text-secondary: #556070;
     --text-user: #ffffff;
-    --accent: #c17f4a;
-    --accent-light: #f5ede2;
-    --border: #e8e2da;
-    --shadow: 0 8px 32px rgba(0,0,0,0.08);
-    --radius: 20px;
+    --accent: #1755c8;
+    --accent-light: rgba(23, 85, 200, 0.08);
+    --border: rgba(23, 85, 200, 0.15);
+    --shadow: 0 16px 36px rgba(15, 23, 42, 0.14);
   }
 
   body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    background:
+      radial-gradient(circle at top left, rgba(0, 212, 255, 0.08), transparent 32%),
+      linear-gradient(180deg, #040b16 0%, #07111f 52%, #050d1a 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    padding: 20px;
+    min-height: 100svh;
+    padding: 0;
+    color: var(--text-primary);
+    transition: background 0.3s ease, color 0.3s ease;
   }
 
   .chat-wrapper {
     width: 100%;
     max-width: 420px;
-    height: 620px;
+    height: min(100vh, 620px);
+    height: min(100svh, 620px);
     background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow), 0 2px 8px rgba(0,0,0,0.04);
+    border-radius: 0;
+    backdrop-filter: blur(16px);
+    box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     border: 1px solid var(--border);
   }
 
-  /* Header */
   .chat-header {
-    background: var(--bubble-user);
+    background: var(--surface-soft);
     padding: 18px 22px;
     display: flex;
     align-items: center;
     gap: 14px;
     flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
   }
 
   .avatar {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), #e8a86a);
+    background: linear-gradient(135deg, var(--accent), rgba(0, 212, 255, 0.65));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Fraunces', serif;
+    font-family: 'Syne', sans-serif;
     font-size: 20px;
-    color: white;
-    font-weight: 500;
+    color: var(--text-user);
+    font-weight: 700;
     flex-shrink: 0;
   }
 
   .header-info h2 {
-    font-family: 'Fraunces', serif;
+    font-family: 'Syne', sans-serif;
     font-size: 17px;
-    font-weight: 500;
-    color: #ffffff;
+    font-weight: 700;
+    color: var(--text-primary);
     letter-spacing: 0.01em;
   }
 
   .header-info p {
     font-size: 12px;
-    color: rgba(255,255,255,0.65);
-    font-weight: 300;
+    color: var(--text-secondary);
+    font-weight: 400;
     margin-top: 2px;
   }
 
@@ -110,6 +132,7 @@
     flex-direction: column;
     gap: 12px;
     scroll-behavior: smooth;
+    background: transparent;
   }
 
   .chat-messages::-webkit-scrollbar { width: 4px; }
@@ -138,12 +161,14 @@
     font-size: 14px;
     line-height: 1.55;
     font-weight: 400;
+    border: 1px solid transparent;
   }
 
   .message.bot .bubble {
     background: var(--bubble-bot);
     color: var(--text-primary);
     border-bottom-left-radius: 4px;
+    border-color: var(--border);
   }
 
   .message.user .bubble {
@@ -170,12 +195,13 @@
     border-radius: 16px;
     border-bottom-left-radius: 4px;
     width: fit-content;
+    border: 1px solid var(--border);
   }
 
   .typing-dot {
     width: 7px;
     height: 7px;
-    background: #aaa;
+    background: var(--text-secondary);
     border-radius: 50%;
     animation: typingBounce 1.2s ease infinite;
   }
@@ -188,7 +214,6 @@
     30% { transform: translateY(-5px); }
   }
 
-  /* Suggestions */
   .suggestions {
     padding: 0 18px 10px;
     display: flex;
@@ -199,12 +224,12 @@
 
   .suggestion-btn {
     background: var(--accent-light);
-    border: 1px solid #e2cebc;
-    color: #7a4f28;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
     border-radius: 20px;
     padding: 6px 13px;
     font-size: 12.5px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: inherit;
     cursor: pointer;
     transition: all 0.18s ease;
     white-space: nowrap;
@@ -213,12 +238,11 @@
 
   .suggestion-btn:hover {
     background: var(--accent);
-    color: white;
+    color: var(--text-user);
     border-color: var(--accent);
     transform: translateY(-1px);
   }
 
-  /* Input */
   .chat-input-area {
     padding: 14px 18px 18px;
     border-top: 1px solid var(--border);
@@ -235,18 +259,22 @@
     border-radius: 14px;
     padding: 10px 14px;
     font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: inherit;
     color: var(--text-primary);
-    background: var(--bg);
+    background: rgba(255, 255, 255, 0.02);
     resize: none;
     outline: none;
     max-height: 100px;
     line-height: 1.5;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .chat-input:focus { border-color: var(--accent); }
-  .chat-input::placeholder { color: #bbb; }
+  .chat-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.12);
+  }
+
+  .chat-input::placeholder { color: var(--text-secondary); }
 
   .send-btn {
     width: 40px;
@@ -262,11 +290,11 @@
     transition: all 0.18s ease;
   }
 
-  .send-btn:hover { background: #3d6456; transform: scale(1.05); }
+  .send-btn:hover { background: #12bde2; transform: scale(1.05); }
   .send-btn:active { transform: scale(0.97); }
   .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-  .send-btn svg { width: 18px; height: 18px; fill: white; }
+  .send-btn svg { width: 18px; height: 18px; fill: var(--text-user); }
 </style>
 </head>
 <body>
@@ -299,50 +327,37 @@
 </div>
 
 <script>
-const SYSTEM_PROMPT = `You are a warm, friendly, and knowledgeable assistant for Rasmitha Chinthalapally's portfolio website. Your job is to answer visitor questions about Rasmitha in a conversational, helpful, and enthusiastic way. Keep responses concise (2-4 sentences unless more detail is needed). Use emojis occasionally to keep things friendly. Never make up information — only use what's provided below.
-
-ABOUT RASMITHA:
-Full Name: Chinthalapally Rasmitha
-Phone: (656) 216-9670
-Email: rasmitha@usf.edu
-GitHub: https://github.com/Rasmitha06
-LinkedIn: https://www.linkedin.com/in/rasmithach03/
-
-SUMMARY:
-Graduate Computer Science student at the University of South Florida (USF), Tampa, FL. Specializes in scalable ML pipelines, feature engineering, and low-latency inference systems. Experienced in model evaluation, deployment efficiency, and performance optimization using Python, Azure, and SQL.
-
-EDUCATION:
-1. University of South Florida, Tampa, FL — M.S. in Computer Science (Expected May 2026), GPA: 3.89
-   Coursework: Data Mining, AI, Machine Learning, Network Security, HCI
-2. Malla Reddy Engineering College for Women, Hyderabad — B.Tech in Computer Science (Dec 2020 – May 2024), GPA: 9.22
-
-EXPERIENCE:
-- Student Assistant at USF (Jan 2025 – Present):
-  • Conducted structured model performance reviews for 20+ ML and analytics projects
-  • Built a Python automation framework for cleaning and preprocessing 500+ datasets, saving 20+ hours/week
-  • Streamlined lab workflows for 30+ students using Copilot-assisted debugging, reducing support queries by 25%
-
-PROJECTS:
-1. Real-Time Sign Language Interpretation (May 2025): Computer-vision pipeline extracting 63 hand landmarks/frame, accuracy 89%→93% across 26 gesture classes, <20ms latency at 30+ FPS, 2,500-sample custom dataset.
-2. Suspicious Activity Detection from CCTV (Oct 2024): ResNet-based image classifier with 90% accuracy, 40% reduction in processed frames, GUI-based alert tool reducing response time by 30%.
-3. Detecting Malicious URLs (Jul 2023): Real-time web app for URL detection, Logistic Regression & SVM models, 9% accuracy boost via hyperparameter tuning, <50ms inference latency, published in JST journal (DOI: 10.46243).
-4. Recognition of Emotional Cues in Speech (Nov 2022): CNN classifier using MFCCs, 91% F1-score across 5 emotional categories, pipeline over 1,400+ RAVDESS audio samples.
-
-PUBLICATION:
-"Enhanced Malicious URL Detection System with Machine Learning Algorithms", Journal of Science and Technology (JST), DOI: 10.46243, Volume 8, Issue 07, July 2023.
-
-SKILLS:
-- Programming & Databases: Python, C, Java, SQL, JavaScript, HTML, CSS, MySQL, Oracle, MongoDB
-- Cloud & Big Data: Microsoft Azure, AWS (S3, EC2), Snowflake, Databricks, PySpark, Hadoop
-- Data Engineering: Data Pipelines, ETL, Data Transformation, Pandas, NumPy, Pickle, MFCC
-- Tools & Visualization: Git, GitHub Copilot, Linux, Power BI, Tableau, SharePoint
-- Machine Learning: TensorFlow, CNNs, NLP, OpenCV, Feature Engineering, Model Evaluation, MediaPipe, Scikit-learn, Keras
-
-If asked about contact or hiring, encourage visitors to reach out via email (rasmitha@usf.edu) or LinkedIn. Always be positive and represent Rasmitha well!`;
-
 const conversationHistory = [{ role: 'user', content: 'Tell me about Rasmitha' },
   { role: 'assistant', content: '...' }];
 let isLoading = false;
+
+async function postToChatApi(messages) {
+  const endpoints = ['/api/chat', '/chat'];
+  const backendHostFallback = `${location.protocol}//${location.hostname}:3001/chat`;
+  const localhostFallback = 'http://localhost:3001/chat';
+  endpoints.push(backendHostFallback);
+  if (location.hostname !== 'localhost') endpoints.push(localhostFallback);
+
+  let lastError = null;
+
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+      return data;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error('Unable to reach chat API');
+}
 
 function addMessage(text, role, animate = true) {
   const messages = document.getElementById('messages');
@@ -394,29 +409,17 @@ async function sendMessage(overrideText) {
   showTyping();
 
   try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: conversationHistory })
-    });
-
-    const data = await response.json();
-    console.log('Frontend received:', data);
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Request failed');
-    }
+    const data = await postToChatApi(conversationHistory);
+    const reply = data.reply || "Sorry, I couldn't get a response right now.";
 
     hideTyping();
-
-    const reply = data.reply || "Sorry, I couldn't get a response right now.";
     addMessage(reply, 'bot');
     conversationHistory.push({ role: 'assistant', content: reply });
-
-  } catch (error) {
-    console.error('Chatbot frontend error:', error);
+  } catch (err) {
+    console.error('Chatbot frontend error:', err);
     hideTyping();
-    addMessage("Oops! Something went wrong. Please try again in a moment. 😊", 'bot');
+    const details = err?.message ? `<br><small style="opacity:.8">(${err.message})</small>` : '';
+    addMessage(`Oops! Something went wrong. Please try again in a moment. 😊${details}`, 'bot');
   } finally {
     isLoading = false;
     document.getElementById('sendBtn').disabled = false;
@@ -427,6 +430,16 @@ function sendSuggestion(btn) {
   const text = btn.textContent.replace(/^[^\w]+/, '').trim();
   sendMessage(text);
 }
+
+function applyEmbeddedTheme(theme) {
+  document.body.classList.toggle('light', theme === 'light');
+}
+
+window.addEventListener('message', (event) => {
+  if (event.origin !== window.location.origin) return;
+  if (event.data?.type !== 'portfolio-theme') return;
+  applyEmbeddedTheme(event.data.theme);
+});
 
 // Auto-resize textarea
 document.getElementById('chatInput').addEventListener('input', function () {
@@ -443,6 +456,13 @@ document.getElementById('chatInput').addEventListener('keydown', function (e) {
 
 // Welcome message
 window.addEventListener('load', () => {
+  try {
+    const parentIsLight = window.parent && window.parent !== window && window.parent.document.body.classList.contains('light');
+    applyEmbeddedTheme(parentIsLight ? 'light' : 'dark');
+  } catch (error) {
+    applyEmbeddedTheme('dark');
+  }
+
   setTimeout(() => {
     addMessage("Hi there! 👋 I'm Rasmitha's assistant. I can tell you all about her background, skills, projects, and more. What would you like to know?", 'bot');
   }, 400);
