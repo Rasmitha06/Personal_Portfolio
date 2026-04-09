@@ -24,6 +24,26 @@ function getCommonReply(text) {
 
   if (!normalized) return null;
 
+  if (normalized.includes('portfolio assistant') || normalized.includes('chatbot project') || normalized.includes('portfolio chatbot')) {
+    return 'The Portfolio Assistant Chatbot is an AI feature built directly into Rasmitha’s portfolio. It uses the Gemini API, JavaScript, HTML, and CSS to answer questions about her skills, projects, and experience in real time, making the portfolio more interactive and visitor-friendly.';
+  }
+
+  if (normalized.includes('sign language') || normalized.includes('asl') || normalized.includes('real-time sign language')) {
+    return 'The Real-Time Sign Language Interpretation project uses OpenCV, MediaPipe, CNNs, and Python to classify 26 ASL gestures from live hand landmarks. It reached 93% accuracy with sub-20ms latency at 30+ FPS using a 2,500-sample custom dataset.';
+  }
+
+  if (normalized.includes('malicious url') || normalized.includes('url detection')) {
+    return 'The Malicious URL Detection System is an end-to-end web app for real-time URL risk assessment. It uses lexical feature extraction with Logistic Regression and SVM models, improved accuracy by 9% through tuning, and delivers inference in under 50ms.';
+  }
+
+  if (normalized.includes('emotional cue') || normalized.includes('speech emotion') || normalized.includes('ravdess')) {
+    return 'The Emotional Cue Recognition in Speech project uses CNNs on MFCC, chroma, and mel-spectrogram features from more than 1,400 RAVDESS audio samples. It achieved a 91% F1-score across 5 emotional categories.';
+  }
+
+  if (normalized.includes('suspicious activity') || normalized.includes('cctv')) {
+    return 'The Suspicious Activity Detection project uses a ResNet-based classifier on CCTV imagery to detect risky events. It achieved 90% accuracy, reduced processed frames by 40%, and used a GUI alert tool that improved response time by 30%.';
+  }
+
   if (normalized.includes('email') || normalized.includes('contact') || normalized.includes('reach out')) {
     return 'You can reach Rasmitha at rasmitha@usf.edu, and she is also available on LinkedIn at linkedin.com/in/rasmithach03.';
   }
