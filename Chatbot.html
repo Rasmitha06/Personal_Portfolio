@@ -405,6 +405,21 @@ function formatMessageHtml(text) {
     .replace(/\n/g, '<br>');
 }
 
+function getFriendlyErrorText(message) {
+  const normalized = (message || '').toLowerCase();
+
+  if (
+    normalized.includes('production chat api is unavailable') ||
+    normalized.includes('api key') ||
+    normalized.includes('credential') ||
+    normalized.includes('unauthorized')
+  ) {
+    return "I'm temporarily unavailable right now, but you can still explore Rasmitha's projects, experience, and contact details on the portfolio.";
+  }
+
+  return 'Oops! Something went wrong. Please try again in a moment. 😊';
+}
+
 function showTyping() {
   const messages = document.getElementById('messages');
   const div = document.createElement('div');
@@ -466,9 +481,7 @@ async function sendMessage(overrideText) {
   } catch (err) {
     console.error('Chatbot frontend error:', err);
     hideTyping();
-    const message = err?.message || '';
-    const details = message ? `\n(${message})` : '';
-    addMessage(`Oops! Something went wrong. Please try again in a moment. 😊${details}`, 'bot');
+    addMessage(getFriendlyErrorText(err?.message), 'bot');
   } finally {
     isLoading = false;
     document.getElementById('sendBtn').disabled = false;

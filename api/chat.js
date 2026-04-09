@@ -33,6 +33,26 @@ function includesAny(text, patterns) {
   return patterns.some((pattern) => text.includes(pattern));
 }
 
+function getFriendlyServiceReply(errorMessage = '') {
+  const normalized = errorMessage.toLowerCase();
+
+  if (normalized.includes('quota')) {
+    return "I'm receiving too many requests right now. Please wait a few seconds and try again.";
+  }
+
+  if (
+    normalized.includes('api key') ||
+    normalized.includes('api_key') ||
+    normalized.includes('credential') ||
+    normalized.includes('permission denied') ||
+    normalized.includes('unauthorized')
+  ) {
+    return "I'm temporarily unavailable right now, but you can still explore Rasmitha's projects, experience, and contact details on the portfolio.";
+  }
+
+  return "I'm having trouble answering right now. Please try again in a moment, or explore the portfolio sections for more details.";
+}
+
 function getCommonReply(text) {
   const normalized = text.toLowerCase();
   const wantsStepByStep = includesAny(normalized, ['step by step', 'how does it work', 'how it works', 'how did she build', 'explain']);
@@ -140,7 +160,10 @@ export default async function handler(req, res) {
     const { messages = [] } = req.body || {};
 
     if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: 'Missing GEMINI_API_KEY in environment' });
+      return res.status(200).json({
+        reply: "I'm temporarily unavailable right now, but you can still explore Rasmitha's projects, experience, and contact details on the portfolio.",
+        source: 'fallback'
+      });
     }
 
     const latestUserText = getLatestUserText(messages);
@@ -183,13 +206,10 @@ export default async function handler(req, res) {
       console.error('Gemini API error:', data);
 
       const errorMessage = data.error?.message || 'Gemini API request failed';
-      if (errorMessage.toLowerCase().includes('quota')) {
-        return res.status(200).json({
-          reply: "I'm receiving too many requests right now. Please wait a few seconds and try again."
-        });
-      }
-
-      return res.status(response.status).json({ error: errorMessage });
+      return res.status(200).json({
+        reply: getFriendlyServiceReply(errorMessage),
+        source: 'fallback'
+      });
     }
 
     const reply =
@@ -205,6 +225,9 @@ export default async function handler(req, res) {
     return res.status(200).json({ reply, source: 'model' });
   } catch (error) {
     console.error('Server error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(200).json({
+      reply: "I'm having trouble answering right now. Please try again in a moment, or explore the portfolio sections for more details.",
+      source: 'fallback'
+    });
   }
 }
