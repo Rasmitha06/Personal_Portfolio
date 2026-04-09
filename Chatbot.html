@@ -332,11 +332,10 @@ const conversationHistory = [{ role: 'user', content: 'Tell me about Rasmitha' }
 let isLoading = false;
 
 async function postToChatApi(messages) {
-  const endpoints = ['/api/chat', '/chat'];
-  const backendHostFallback = `${location.protocol}//${location.hostname}:3001/chat`;
-  const localhostFallback = 'http://localhost:3001/chat';
-  endpoints.push(backendHostFallback);
-  if (location.hostname !== 'localhost') endpoints.push(localhostFallback);
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
+  const endpoints = isLocalhost
+    ? ['/api/chat', '/chat', `${location.protocol}//${location.hostname}:3001/chat`, 'http://localhost:3001/chat']
+    : ['/api/chat'];
 
   let lastError = null;
 
@@ -348,7 +347,7 @@ async function postToChatApi(messages) {
         body: JSON.stringify({ messages })
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
       return data;
     } catch (err) {
@@ -356,7 +355,15 @@ async function postToChatApi(messages) {
     }
   }
 
-  throw lastError || new Error('Unable to reach chat API');
+  if (!lastError) {
+    throw new Error('Unable to reach chat API');
+  }
+
+  if (!isLocalhost && lastError.message === 'Failed to fetch') {
+    throw new Error('Production chat API is unavailable. Check the Vercel deployment and GEMINI_API_KEY.');
+  }
+
+  throw lastError;
 }
 
 function addMessage(text, role, animate = true) {
@@ -418,7 +425,8 @@ async function sendMessage(overrideText) {
   } catch (err) {
     console.error('Chatbot frontend error:', err);
     hideTyping();
-    const details = err?.message ? `<br><small style="opacity:.8">(${err.message})</small>` : '';
+    const message = err?.message || '';
+    const details = message ? `<br><small style="opacity:.8">(${message})</small>` : '';
     addMessage(`Oops! Something went wrong. Please try again in a moment. 😊${details}`, 'bot');
   } finally {
     isLoading = false;
