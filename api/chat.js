@@ -91,7 +91,7 @@ function getCommonReply(text) {
     return 'Rasmitha is pursuing an M.S. in Computer Science at the University of South Florida and previously completed a B.Tech in Computer Science and Engineering at Malla Reddy Engineering College for Women.';
   }
 
-  if (normalized.includes('skills') || normalized.includes('tech stack')) {
+  if (includesAny(normalized, ['skills', 'tech stack', 'languages', 'programming languages', 'frameworks', 'libraries', 'tools', 'tooling', 'cloud', 'platforms', 'databases', 'database', 'ml stack', 'machine learning stack'])) {
     return 'Rasmitha’s core strengths include Python, Java, SQL, JavaScript, machine learning, NLP, computer vision, data pipelines, backend systems, and full-stack development.';
   }
 
