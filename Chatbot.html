@@ -329,6 +329,7 @@
 <script>
 const conversationHistory = [{ role: 'user', content: 'Tell me about Rasmitha' },
   { role: 'assistant', content: '...' }];
+const MAX_CLIENT_HISTORY = 6;
 let isLoading = false;
 
 async function postToChatApi(messages) {
@@ -416,7 +417,8 @@ async function sendMessage(overrideText) {
   showTyping();
 
   try {
-    const data = await postToChatApi(conversationHistory);
+    const recentMessages = conversationHistory.slice(-MAX_CLIENT_HISTORY);
+    const data = await postToChatApi(recentMessages);
     const reply = data.reply || "Sorry, I couldn't get a response right now.";
 
     hideTyping();
