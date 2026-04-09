@@ -1,5 +1,7 @@
 const MODEL = 'gemini-2.5-flash-lite';
-const MAX_HISTORY = 6;
+const MAX_HISTORY = 4;
+const replyCache = new Map();
+const CACHE_LIMIT = 100;
 const SYSTEM_PROMPT = [
   "You are Rasmitha Chinthalapally's portfolio assistant.",
   'Answer only from the portfolio context you are given.',
@@ -11,7 +13,7 @@ const SYSTEM_PROMPT = [
   'Rasmitha is a Computer Science graduate student at the University of South Florida in Tampa, Florida, expected to graduate in May 2026 with a 3.89 GPA.',
   'She completed a B.Tech in Computer Science and Engineering at Malla Reddy Engineering College for Women with a 9.22 GPA.',
   'At USF as a Student Assistant since January 2025, she reviewed 20+ ML and analytics projects, built a Python automation framework for preprocessing 500+ datasets that saved 20+ hours per week, and streamlined lab workflows for 30+ students using Copilot-assisted debugging, reducing support queries by 25%.',
-  'Core skills include Python, Java, C, SQL, JavaScript, HTML, CSS, MySQL, Oracle, MongoDB, Azure, AWS, Snowflake, Databricks, PySpark, Hadoop, TensorFlow, OpenCV, NLP, CNNs, MediaPipe, Scikit-learn, Keras, backend systems, full-stack development, data pipelines, and machine learning.',
+  'Core strengths include Python, Java, SQL, JavaScript, backend systems, full-stack development, data pipelines, machine learning, NLP, computer vision, Azure, AWS, Databricks, Snowflake, TensorFlow, OpenCV, and Scikit-learn.',
   'Main projects:',
   'Portfolio Assistant Chatbot: AI assistant built into the portfolio using Gemini API, JavaScript, HTML, CSS, and prompt engineering to answer visitor questions in real time.',
   'Real-Time Sign Language Interpretation: OpenCV, MediaPipe, CNNs, and Python; 26 ASL classes; 93% accuracy; sub-20ms latency at 30+ FPS; 2,500-sample custom dataset.',
@@ -36,6 +38,26 @@ function getCommonReply(text) {
   const wantsStepByStep = includesAny(normalized, ['step by step', 'how does it work', 'how it works', 'how did she build', 'explain']);
 
   if (!normalized) return null;
+
+  if (normalized === 'projects' || normalized.includes('all projects')) {
+    return 'Rasmitha’s main projects include a Portfolio Assistant Chatbot, Real-Time Sign Language Interpretation, Malicious URL Detection, Emotional Cue Recognition in Speech, and Suspicious Activity Detection from CCTV. Together, they reflect her strengths in software engineering, machine learning, and real-time intelligent systems.';
+  }
+
+  if (normalized === 'skills & tech' || normalized === 'skills and tech') {
+    return 'Rasmitha works across Python, Java, SQL, JavaScript, HTML, CSS, Azure, AWS, Databricks, Snowflake, TensorFlow, OpenCV, Scikit-learn, NLP, CNNs, backend systems, full-stack development, and data pipelines.';
+  }
+
+  if (normalized === 'education') {
+    return 'Rasmitha is pursuing an M.S. in Computer Science at the University of South Florida and completed her B.Tech in Computer Science and Engineering at Malla Reddy Engineering College for Women.';
+  }
+
+  if (normalized === 'contact') {
+    return 'You can reach Rasmitha at rasmitha@usf.edu, and she is also available on LinkedIn at linkedin.com/in/rasmithach03.';
+  }
+
+  if (normalized === 'about rasmitha') {
+    return 'Rasmitha is a Computer Science graduate student at USF focused on software engineering, machine learning, backend systems, and data-driven products. She enjoys building scalable, real-world applications across AI, analytics, and full-stack development.';
+  }
 
   if (includesAny(normalized, ['portfolio assistant', 'chatbot project', 'portfolio chatbot', 'project 5', 'fifth project', 'last project'])) {
     return wantsStepByStep
@@ -122,6 +144,18 @@ export default async function handler(req, res) {
     }
 
     const latestUserText = getLatestUserText(messages);
+    if (latestUserText.length < 2) {
+      return res.status(200).json({
+        reply: 'Could you ask a slightly more specific question about Rasmitha, her work, or her projects?',
+        source: 'guard'
+      });
+    }
+
+    const cacheKey = latestUserText.toLowerCase().trim();
+    if (replyCache.has(cacheKey)) {
+      return res.status(200).json({ reply: replyCache.get(cacheKey), source: 'cache' });
+    }
+
     const commonReply = getCommonReply(latestUserText);
     if (commonReply) {
       return res.status(200).json({ reply: commonReply, source: 'rule' });
@@ -161,6 +195,12 @@ export default async function handler(req, res) {
     const reply =
       data.candidates?.[0]?.content?.parts?.[0]?.text ||
       "Sorry, I couldn't generate a response.";
+
+    if (replyCache.size >= CACHE_LIMIT) {
+      const firstKey = replyCache.keys().next().value;
+      replyCache.delete(firstKey);
+    }
+    replyCache.set(cacheKey, reply);
 
     return res.status(200).json({ reply, source: 'model' });
   } catch (error) {
